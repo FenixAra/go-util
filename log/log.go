@@ -28,24 +28,24 @@ type Logger struct {
 	ref      string
 }
 
-func New(ref string, level, fileSize int) *Logger {
+func New(config *Config) *Logger {
 	l := &Logger{}
-	l.Init(ref, level, fileSize)
+	l.Init(config)
 	return l
 }
 
-func (l *Logger) Init(ref string, level, fileSize int) error {
-	l.ref = ref
-	l.level = level
-	l.fileSize = fileSize
+func (l *Logger) Init(config *Config) error {
+	l.ref = config.Reference
+	l.level = config.Level
+	l.fileSize = config.FileSize
 	if l.ref == "" {
-		refuuid, err := uuid.NewV4()
+		refUUID, err := uuid.NewV4()
 		if err != nil {
 			l.Error("Unable to generate new UUID. Err: ", err)
 			return err
 		}
 
-		l.ref = refuuid.String()
+		l.ref = refUUID.String()
 	}
 	l.l = log.New(os.Stdout, fmt.Sprintf("[ %s ] ", l.ref), 0)
 	return nil
