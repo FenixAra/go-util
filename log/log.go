@@ -10,12 +10,20 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+type Level int
+
 const (
-	DEBUG = iota
+	DEBUG Level = iota + 1
 	INFO
 	WARN
 	ERROR
 	FATAL
+
+	Debug = "Debug"
+	Info  = "Info"
+	Warn  = "Warn"
+	Error = "Error"
+	Fatal = "Fatal"
 
 	SHORT = iota
 	FULL
@@ -23,7 +31,7 @@ const (
 
 type Logger struct {
 	l        *log.Logger
-	level    int
+	level    Level
 	fileSize int
 	ref      string
 }
