@@ -10,9 +10,9 @@ func Contains(sa []string, s string) bool {
 }
 
 func ContainsAny(sa, s []string) bool {
-	m := make(map[string]bool)
+	m := make(map[string]struct{})
 	for _, v := range s {
-		m[v] = true
+		m[v] = struct{}{}
 	}
 
 	for _, v := range sa {
@@ -24,12 +24,12 @@ func ContainsAny(sa, s []string) bool {
 }
 
 func RemoveDuplicates(sa []string) []string {
-	m := make(map[string]bool)
+	m := make(map[string]struct{})
 	var res []string
 	for _, v := range sa {
 		if _, ok := m[v]; !ok {
 			res = append(res, v)
-			m[v] = true
+			m[v] = struct{}{}
 		}
 	}
 
@@ -37,9 +37,9 @@ func RemoveDuplicates(sa []string) []string {
 }
 
 func AppendWithoutDuplicates(src []string, s []string) []string {
-	m := make(map[string]bool)
+	m := make(map[string]struct{})
 	for _, v := range src {
-		m[v] = true
+		m[v] = struct{}{}
 	}
 
 	for _, v := range s {
@@ -51,9 +51,9 @@ func AppendWithoutDuplicates(src []string, s []string) []string {
 }
 
 func RemoveFromArray(src []string, s []string) []string {
-	m := make(map[string]bool)
+	m := make(map[string]struct{})
 	for _, v := range s {
-		m[v] = true
+		m[v] = struct{}{}
 	}
 
 	var newArray []string
