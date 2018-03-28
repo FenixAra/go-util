@@ -25,22 +25,31 @@ type Config struct {
 	Reference string
 }
 
-func NewConfig(ref, levelStr string, level Level, filePathSize int) *Config {
-	if level == 0 {
-		switch levelStr {
-		case Debug:
-			level = DEBUG
-		case Info:
-			level = INFO
-		case Warn:
-			level = WARN
-		case Error:
-			level = ERROR
-		case Fatal:
-			level = FATAL
-		default:
-			level = INFO
-		}
+func NewConfig(ref, levelStr, filePathSizeStr string) *Config {
+	var level Level
+	var filePathSize int
+	switch levelStr {
+	case Debug:
+		level = DEBUG
+	case Info:
+		level = INFO
+	case Warn:
+		level = WARN
+	case Error:
+		level = ERROR
+	case Fatal:
+		level = FATAL
+	default:
+		level = INFO
+	}
+
+	switch filePathSizeStr {
+	case FilePathShort:
+		filePathSize = SHORT
+	case FilePathFull:
+		filePathSize = FULL
+	default:
+		filePathSize = SHORT
 	}
 
 	return &Config{

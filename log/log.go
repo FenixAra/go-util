@@ -27,6 +27,9 @@ const (
 
 	SHORT = iota
 	FULL
+
+	FilePathShort = "Short"
+	FilePathFull  = "Full"
 )
 
 type Logger struct {
