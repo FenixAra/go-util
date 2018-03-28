@@ -18,14 +18,14 @@ type Config struct {
 	// SHORT - Only the file name is displayed
 	// FULL - File name along with full file path is specified
 	// SHORT is used by default
-	FileSize int
+	FilePathSize int
 
 	// Log Reference (context) ID to be added to each log
 	// This can be used to search relevent logs for the context
 	Reference string
 }
 
-func NewConfig(ref, levelStr string, level Level, fileSize int) *Config {
+func NewConfig(ref, levelStr string, level Level, filePathSize int) *Config {
 	if level == 0 {
 		switch levelStr {
 		case Debug:
@@ -44,9 +44,9 @@ func NewConfig(ref, levelStr string, level Level, fileSize int) *Config {
 	}
 
 	return &Config{
-		Reference: ref,
-		Level:     level,
-		FileSize:  fileSize,
+		Reference:    ref,
+		Level:        level,
+		FilePathSize: filePathSize,
 	}
 }
 
@@ -54,8 +54,8 @@ func (c *Config) SetLevel(level Level) {
 	c.Level = level
 }
 
-func (c *Config) SetFileSize(fileSize int) {
-	c.FileSize = fileSize
+func (c *Config) SetFilePathSize(filePathSize int) {
+	c.FilePathSize = filePathSize
 }
 
 func (c *Config) SetReference(ref string) {

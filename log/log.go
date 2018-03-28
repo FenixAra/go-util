@@ -30,10 +30,10 @@ const (
 )
 
 type Logger struct {
-	l        *log.Logger
-	level    Level
-	fileSize int
-	ref      string
+	l            *log.Logger
+	level        Level
+	filePathSize int
+	ref          string
 }
 
 func New(config *Config) *Logger {
@@ -45,7 +45,7 @@ func New(config *Config) *Logger {
 func (l *Logger) Init(config *Config) error {
 	l.ref = config.Reference
 	l.level = config.Level
-	l.fileSize = config.FileSize
+	l.filePathSize = config.FilePathSize
 	if l.ref == "" {
 		refUUID, err := uuid.NewV4()
 		if err != nil {
@@ -149,7 +149,7 @@ func (l *Logger) formatLog(logType string, v ...interface{}) []interface{} {
 	n = append(n, "["+logType+"] ")
 	_, file, line, _ := runtime.Caller(2)
 	// If you want the short path not the full file path, you can uncomment everything below
-	if l.fileSize == SHORT {
+	if l.filePathSize == SHORT {
 		short := file
 		for i := len(file) - 1; i > 0; i-- {
 			if file[i] == '/' {
@@ -172,7 +172,7 @@ func (l *Logger) formatLogf(logType string, format string, v ...interface{}) (st
 	n = append(n, logType)
 	_, file, line, _ := runtime.Caller(2)
 	// If you want the short path not the full file path, you can uncomment everything below
-	if l.fileSize == SHORT {
+	if l.filePathSize == SHORT {
 		short := file
 		for i := len(file) - 1; i > 0; i-- {
 			if file[i] == '/' {
