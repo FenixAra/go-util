@@ -13,7 +13,7 @@ func AssertEqual(msg string, expected, got interface{}, t *testing.T) {
 }
 
 func AssertNotNil(msg string, v interface{}, t *testing.T) {
-	if v != nil {
+	if v == nil {
 		t.Errorf("%s. Got: %v", msg, v)
 		t.FailNow()
 	}
