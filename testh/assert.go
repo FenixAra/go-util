@@ -12,6 +12,13 @@ func AssertEqual(msg string, expected, got interface{}, t *testing.T) {
 	}
 }
 
+func AssertNotNil(msg string, v interface{}, t *testing.T) {
+	if v != nil {
+		t.Errorf("%s. Got: %v", msg, v)
+		t.FailNow()
+	}
+}
+
 func AssertDeepEqual(msg string, expected, got interface{}, t *testing.T) {
 	if !reflect.DeepEqual(expected, got) {
 		t.Errorf("%s. Expected value: %v, Got: %v", msg, expected, got)
