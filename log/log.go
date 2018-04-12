@@ -6,6 +6,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"time"
 
 	uuid "github.com/satori/go.uuid"
 )
@@ -37,10 +38,12 @@ type Logger struct {
 	level        Level
 	filePathSize int
 	ref          string
+	config       *Config
 }
 
 func New(config *Config) *Logger {
 	l := &Logger{}
+	l.config = config
 	l.Init(config)
 	return l
 }
@@ -58,7 +61,7 @@ func (l *Logger) Init(config *Config) error {
 
 		l.ref = refUUID.String()
 	}
-	l.l = log.New(os.Stdout, fmt.Sprintf("[ %s ] ", l.ref), 0)
+	l.l = log.New(os.Stdout, fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref), 0)
 	return nil
 }
 
@@ -111,7 +114,8 @@ func (l *Logger) Debugf(format string, v ...interface{}) {
 		return
 	}
 
-	l.l.Printf(l.formatLogf("DEBUG", format, v...))
+	format, v = l.formatLogf("DEBUG", format, v...)
+	l.l.Printf(format, v...)
 }
 
 func (l *Logger) Infof(format string, v ...interface{}) {
@@ -119,7 +123,8 @@ func (l *Logger) Infof(format string, v ...interface{}) {
 		return
 	}
 
-	l.l.Printf(l.formatLogf("INFO", format, v...))
+	format, v = l.formatLogf("INFO", format, v...)
+	l.l.Printf(format, v...)
 }
 
 func (l *Logger) Warnf(format string, v ...interface{}) {
@@ -127,7 +132,8 @@ func (l *Logger) Warnf(format string, v ...interface{}) {
 		return
 	}
 
-	l.l.Printf(l.formatLogf("WARN", format, v...))
+	format, v = l.formatLogf("WARN", format, v...)
+	l.l.Printf(format, v...)
 }
 
 func (l *Logger) Errorf(format string, v ...interface{}) {
@@ -135,7 +141,8 @@ func (l *Logger) Errorf(format string, v ...interface{}) {
 		return
 	}
 
-	l.l.Printf(l.formatLogf("ERROR", format, v...))
+	format, v = l.formatLogf("ERROR", format, v...)
+	l.l.Printf(format, v...)
 }
 
 func (l *Logger) Fatalf(format string, v ...interface{}) {
@@ -143,7 +150,8 @@ func (l *Logger) Fatalf(format string, v ...interface{}) {
 		return
 	}
 
-	l.l.Printf(l.formatLogf("FATAL", format, v...))
+	format, v = l.formatLogf("FATAL", format, v...)
+	l.l.Printf(format, v...)
 }
 
 // Format the log to contain the log levels

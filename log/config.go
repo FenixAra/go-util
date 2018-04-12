@@ -23,9 +23,11 @@ type Config struct {
 	// Log Reference (context) ID to be added to each log
 	// This can be used to search relevent logs for the context
 	Reference string
+
+	AppName string
 }
 
-func NewConfig(ref, levelStr, filePathSizeStr string) *Config {
+func NewConfig(ref, levelStr, filePathSizeStr, appName string) *Config {
 	var level Level
 	var filePathSize int
 	switch levelStr {
@@ -56,6 +58,7 @@ func NewConfig(ref, levelStr, filePathSizeStr string) *Config {
 		Reference:    ref,
 		Level:        level,
 		FilePathSize: filePathSize,
+		AppName:      appName,
 	}
 }
 
