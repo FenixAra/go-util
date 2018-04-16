@@ -50,7 +50,7 @@ func NewConfig(ref, levelStr, filePathSizeStr, appName, remoteLoggerURL string) 
 	}
 
 	var remoteLogger bool
-	if remoteLoggerURL != nil {
+	if remoteLoggerURL != "" {
 		remoteLogger = true
 	}
 

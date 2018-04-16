@@ -38,7 +38,7 @@ func (l *Logger) PostToRemote(level, msg string) {
 		return
 	}
 
-	request, err := http.NewRequest(http.MethodPost, l.config.RemoteLoggerURL, bytes.NewBuffer(encryptedReq))
+	request, err := http.NewRequest(http.MethodPost, l.config.RemoteLoggerURL, bytes.NewBuffer(reqData))
 	if err != nil {
 		log.Println("Unable to create new log request. Err:", err)
 		return
