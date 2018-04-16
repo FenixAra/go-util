@@ -25,9 +25,13 @@ type Config struct {
 	Reference string
 
 	AppName string
+
+	RemoteLogger bool
+
+	RemoteLoggerURL string
 }
 
-func NewConfig(ref, levelStr, filePathSizeStr, appName string) *Config {
+func NewConfig(ref, levelStr, filePathSizeStr, appName, remoteLoggerURL string) *Config {
 	var level Level
 	var filePathSize int
 	switch levelStr {
@@ -45,6 +49,11 @@ func NewConfig(ref, levelStr, filePathSizeStr, appName string) *Config {
 		level = INFO
 	}
 
+	var remoteLogger bool
+	if remoteLoggerURL != nil {
+		remoteLogger = true
+	}
+
 	switch filePathSizeStr {
 	case FilePathShort:
 		filePathSize = SHORT
@@ -55,10 +64,12 @@ func NewConfig(ref, levelStr, filePathSizeStr, appName string) *Config {
 	}
 
 	return &Config{
-		Reference:    ref,
-		Level:        level,
-		FilePathSize: filePathSize,
-		AppName:      appName,
+		Reference:       ref,
+		Level:           level,
+		FilePathSize:    filePathSize,
+		AppName:         appName,
+		RemoteLogger:    remoteLogger,
+		RemoteLoggerURL: remoteLoggerURL,
 	}
 }
 

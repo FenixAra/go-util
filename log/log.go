@@ -74,11 +74,21 @@ func (l *Logger) Debug(v ...interface{}) {
 		return
 	}
 
+	if l.config.RemoteLogger {
+		l.PostToRemote("DEBUG", fmt.Sprintln(l.formatLog("DEBUG", v...)...))
+		return
+	}
+
 	l.l.Println(l.formatLog("DEBUG", v...)...)
 }
 
 func (l *Logger) Info(v ...interface{}) {
 	if l.level > INFO {
+		return
+	}
+
+	if l.config.RemoteLogger {
+		l.PostToRemote("INFO", fmt.Sprintln(l.formatLog("INFO", v...)...))
 		return
 	}
 
@@ -90,6 +100,11 @@ func (l *Logger) Warn(v ...interface{}) {
 		return
 	}
 
+	if l.config.RemoteLogger {
+		l.PostToRemote("WARN", fmt.Sprintln(l.formatLog("WARN", v...)...))
+		return
+	}
+
 	l.l.Println(l.formatLog("WARN", v...)...)
 }
 
@@ -98,11 +113,21 @@ func (l *Logger) Error(v ...interface{}) {
 		return
 	}
 
+	if l.config.RemoteLogger {
+		l.PostToRemote("ERROR", fmt.Sprintln(l.formatLog("ERROR", v...)...))
+		return
+	}
+
 	l.l.Println(l.formatLog("ERROR", v...)...)
 }
 
 func (l *Logger) Fatal(v ...interface{}) {
 	if l.level > FATAL {
+		return
+	}
+
+	if l.config.RemoteLogger {
+		l.PostToRemote("FATAL", fmt.Sprintln(l.formatLog("FATAL", v...)...))
 		return
 	}
 
@@ -115,6 +140,11 @@ func (l *Logger) Debugf(format string, v ...interface{}) {
 	}
 
 	format, v = l.formatLogf("DEBUG", format, v...)
+	if l.config.RemoteLogger {
+		l.PostToRemote("DEBUG", fmt.Sprintf(format, v...))
+		return
+	}
+
 	l.l.Printf(format, v...)
 }
 
@@ -124,6 +154,11 @@ func (l *Logger) Infof(format string, v ...interface{}) {
 	}
 
 	format, v = l.formatLogf("INFO", format, v...)
+	if l.config.RemoteLogger {
+		l.PostToRemote("INFO", fmt.Sprintf(format, v...))
+		return
+	}
+
 	l.l.Printf(format, v...)
 }
 
@@ -133,6 +168,11 @@ func (l *Logger) Warnf(format string, v ...interface{}) {
 	}
 
 	format, v = l.formatLogf("WARN", format, v...)
+	if l.config.RemoteLogger {
+		l.PostToRemote("WARN", fmt.Sprintf(format, v...))
+		return
+	}
+
 	l.l.Printf(format, v...)
 }
 
@@ -142,6 +182,11 @@ func (l *Logger) Errorf(format string, v ...interface{}) {
 	}
 
 	format, v = l.formatLogf("ERROR", format, v...)
+	if l.config.RemoteLogger {
+		l.PostToRemote("ERROR", fmt.Sprintf(format, v...))
+		return
+	}
+
 	l.l.Printf(format, v...)
 }
 
@@ -151,6 +196,11 @@ func (l *Logger) Fatalf(format string, v ...interface{}) {
 	}
 
 	format, v = l.formatLogf("FATAL", format, v...)
+	if l.config.RemoteLogger {
+		l.PostToRemote("FATAL", fmt.Sprintf(format, v...))
+		return
+	}
+
 	l.l.Printf(format, v...)
 }
 
@@ -158,18 +208,7 @@ func (l *Logger) Fatalf(format string, v ...interface{}) {
 func (l *Logger) formatLog(logType string, v ...interface{}) []interface{} {
 	var n []interface{}
 	n = append(n, "["+logType+"] ")
-	_, file, line, _ := runtime.Caller(2)
-	// If you want the short path not the full file path, you can uncomment everything below
-	if l.filePathSize == SHORT {
-		short := file
-		for i := len(file) - 1; i > 0; i-- {
-			if file[i] == '/' {
-				short = file[i+1:]
-				break
-			}
-		}
-		file = short
-	}
+	file, line := l.GetFileLine(3)
 
 	n = append(n, file+":"+strconv.Itoa(line)+":")
 	n = append(n, v...)
@@ -181,7 +220,18 @@ func (l *Logger) formatLogf(logType string, format string, v ...interface{}) (st
 	var n []interface{}
 	prefix := "[%s] "
 	n = append(n, logType)
-	_, file, line, _ := runtime.Caller(2)
+	file, line := l.GetFileLine(3)
+
+	prefix += "%s:%d: "
+	format = prefix + format
+	n = append(n, file)
+	n = append(n, line)
+	n = append(n, v...)
+	return format, n
+}
+
+func (l *Logger) GetFileLine(n int) (string, int) {
+	_, file, line, _ := runtime.Caller(n)
 	// If you want the short path not the full file path, you can uncomment everything below
 	if l.filePathSize == SHORT {
 		short := file
@@ -193,11 +243,5 @@ func (l *Logger) formatLogf(logType string, format string, v ...interface{}) (st
 		}
 		file = short
 	}
-
-	prefix += "%s:%d: "
-	format = prefix + format
-	n = append(n, file)
-	n = append(n, line)
-	n = append(n, v...)
-	return format, n
+	return file, line
 }
