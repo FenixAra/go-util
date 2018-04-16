@@ -29,7 +29,7 @@ func (l *Logger) LogAPIInfo(request, method string, responseTime float64, status
 		return
 	}
 
-	l.postToRemote("INFO", "API Request info", request, method, responseTime, status)
+	go l.postToRemote("INFO", "API Request info", request, method, responseTime, status)
 }
 
 func (l *Logger) postToRemote(level, msg, req, method string, responseTime float64, status int) {
@@ -78,5 +78,5 @@ func (l *Logger) postToRemote(level, msg, req, method string, responseTime float
 }
 
 func (l *Logger) PostToRemote(level, msg string) {
-	l.postToRemote(level, msg, "", "", 0, 0)
+	go l.postToRemote(level, msg, "", "", 0, 0)
 }
