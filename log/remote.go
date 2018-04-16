@@ -25,6 +25,10 @@ type Log struct {
 }
 
 func (l *Logger) LogAPIInfo(request, method string, responseTime float64, status int) {
+	if !l.config.RemoteLogger {
+		return
+	}
+
 	l.postToRemote("INFO", "API Request info", request, method, responseTime, status)
 }
 
