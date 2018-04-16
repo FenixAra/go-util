@@ -61,6 +61,7 @@ func (l *Logger) Init(config *Config) error {
 
 		l.ref = refUUID.String()
 	}
+
 	l.l = log.New(os.Stdout, fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref), 0)
 	return nil
 }
@@ -75,7 +76,7 @@ func (l *Logger) Debug(v ...interface{}) {
 	}
 
 	if l.config.RemoteLogger {
-		l.PostToRemote("DEBUG", fmt.Sprintln(l.formatLog("DEBUG", v...)...))
+		l.PostToRemote("DEBUG", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintln(l.formatLog("DEBUG", v...)...))
 		return
 	}
 
@@ -88,7 +89,7 @@ func (l *Logger) Info(v ...interface{}) {
 	}
 
 	if l.config.RemoteLogger {
-		l.PostToRemote("INFO", fmt.Sprintln(l.formatLog("INFO", v...)...))
+		l.PostToRemote("INFO", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintln(l.formatLog("INFO", v...)...))
 		return
 	}
 
@@ -101,7 +102,7 @@ func (l *Logger) Warn(v ...interface{}) {
 	}
 
 	if l.config.RemoteLogger {
-		l.PostToRemote("WARN", fmt.Sprintln(l.formatLog("WARN", v...)...))
+		l.PostToRemote("WARN", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintln(l.formatLog("WARN", v...)...))
 		return
 	}
 
@@ -114,7 +115,7 @@ func (l *Logger) Error(v ...interface{}) {
 	}
 
 	if l.config.RemoteLogger {
-		l.PostToRemote("ERROR", fmt.Sprintln(l.formatLog("ERROR", v...)...))
+		l.PostToRemote("ERROR", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintln(l.formatLog("ERROR", v...)...))
 		return
 	}
 
@@ -127,7 +128,7 @@ func (l *Logger) Fatal(v ...interface{}) {
 	}
 
 	if l.config.RemoteLogger {
-		l.PostToRemote("FATAL", fmt.Sprintln(l.formatLog("FATAL", v...)...))
+		l.PostToRemote("FATAL", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintln(l.formatLog("FATAL", v...)...))
 		return
 	}
 
@@ -141,7 +142,7 @@ func (l *Logger) Debugf(format string, v ...interface{}) {
 
 	format, v = l.formatLogf("DEBUG", format, v...)
 	if l.config.RemoteLogger {
-		l.PostToRemote("DEBUG", fmt.Sprintf(format, v...))
+		l.PostToRemote("DEBUG", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintf(format, v...))
 		return
 	}
 
@@ -155,7 +156,7 @@ func (l *Logger) Infof(format string, v ...interface{}) {
 
 	format, v = l.formatLogf("INFO", format, v...)
 	if l.config.RemoteLogger {
-		l.PostToRemote("INFO", fmt.Sprintf(format, v...))
+		l.PostToRemote("INFO", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintf(format, v...))
 		return
 	}
 
@@ -169,7 +170,7 @@ func (l *Logger) Warnf(format string, v ...interface{}) {
 
 	format, v = l.formatLogf("WARN", format, v...)
 	if l.config.RemoteLogger {
-		l.PostToRemote("WARN", fmt.Sprintf(format, v...))
+		l.PostToRemote("WARN", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintf(format, v...))
 		return
 	}
 
@@ -183,7 +184,7 @@ func (l *Logger) Errorf(format string, v ...interface{}) {
 
 	format, v = l.formatLogf("ERROR", format, v...)
 	if l.config.RemoteLogger {
-		l.PostToRemote("ERROR", fmt.Sprintf(format, v...))
+		l.PostToRemote("ERROR", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintf(format, v...))
 		return
 	}
 
@@ -197,7 +198,7 @@ func (l *Logger) Fatalf(format string, v ...interface{}) {
 
 	format, v = l.formatLogf("FATAL", format, v...)
 	if l.config.RemoteLogger {
-		l.PostToRemote("FATAL", fmt.Sprintf(format, v...))
+		l.PostToRemote("FATAL", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintf(format, v...))
 		return
 	}
 
