@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/tomasen/realip"
 )
 
 type Log struct {
@@ -22,19 +24,30 @@ type Log struct {
 	StatusCode   int       `json:"status_code"`
 	Method       string    `json:"method"`
 	Request      string    `json:"request"`
+	UserAgent    string    `json:"user_agent"`
+	CustomerID   string    `json:"customer_id"`
+	IPAddress    string    `json:"ip_address"`
 }
 
-func (l *Logger) LogAPIInfo(request, method string, responseTime float64, status int) {
+func (l *Logger) LogAPIInfo(r *http.Request, responseTime float64, status int) {
 	if !l.config.RemoteLogger {
 		return
 	}
 
-	go l.postToRemote("INFO", "API Request info", request, method, responseTime, status)
+	go l.postToRemote("INFO", "API Request info", r, responseTime, status)
 }
 
-func (l *Logger) postToRemote(level, msg, req, method string, responseTime float64, status int) {
+func (l *Logger) postToRemote(level, msg string, r *http.Request, responseTime float64, status int) {
 	client := &http.Client{}
 	file, line := l.GetFileLine(3)
+	var method, req, ua, ip string
+	if r != nil {
+		method = r.Method
+		req = r.RequestURI
+		ua = r.UserAgent()
+		ip = realip.RealIP(r)
+	}
+
 	reqData, err := json.Marshal(&Log{
 		Level:        level,
 		Timestamp:    time.Now().UTC(),
@@ -48,6 +61,8 @@ func (l *Logger) postToRemote(level, msg, req, method string, responseTime float
 		StatusCode:   status,
 		Method:       method,
 		Request:      req,
+		UserAgent:    ua,
+		IPAddress:    ip,
 	})
 	if err != nil {
 		log.Println("Unable to marshal log request. Err:", err)
@@ -62,6 +77,10 @@ func (l *Logger) postToRemote(level, msg, req, method string, responseTime float
 
 	// Setting all headers
 	request.Header.Set("Content-Type", "application/json; charset=utf-8")
+	if l.config.RemoteToken != "" {
+		request.SetBasicAuth(l.config.RemoteUserName, l.config.RemoteToken)
+	}
+
 	response, err := client.Do(request)
 	if err != nil {
 		log.Println("Unable to send log request. Err:", err)
@@ -78,5 +97,5 @@ func (l *Logger) postToRemote(level, msg, req, method string, responseTime float
 }
 
 func (l *Logger) PostToRemote(level, msg string) {
-	go l.postToRemote(level, msg, "", "", 0, 0)
+	go l.postToRemote(level, msg, nil, 0, 0)
 }

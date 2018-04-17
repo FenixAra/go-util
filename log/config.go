@@ -29,6 +29,10 @@ type Config struct {
 	RemoteLogger bool
 
 	RemoteLoggerURL string
+
+	RemoteToken string
+
+	RemoteUserName string
 }
 
 func NewConfig(ref, levelStr, filePathSizeStr, appName, remoteLoggerURL string) *Config {
