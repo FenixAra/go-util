@@ -54,7 +54,7 @@ func (l *Logger) postToRemote(level, msg string, r *http.Request, responseTime f
 		Title:        msg,
 		Message:      msg,
 		AppName:      l.config.AppName,
-		RefID:        l.config.Reference,
+		RefID:        l.ref,
 		File:         file,
 		Line:         strconv.Itoa(line),
 		ResponseTime: responseTime,
