@@ -87,6 +87,7 @@ func (l *Logger) postToRemote(level, msg string, r *http.Request, responseTime f
 		return
 	}
 
+	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
 		log.Println("Status code is not 200 (OK). Got:", response.StatusCode)
 		// Handle the error codes
