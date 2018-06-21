@@ -35,7 +35,7 @@ type Config struct {
 	RemoteUserName string
 }
 
-func NewConfig(ref, levelStr, filePathSizeStr, appName, remoteLoggerURL, token string) *Config {
+func NewConfig(ref, levelStr, filePathSizeStr, appName, remoteLoggerURL, token, uname string) *Config {
 	var level Level
 	var filePathSize int
 	switch levelStr {
@@ -75,6 +75,7 @@ func NewConfig(ref, levelStr, filePathSizeStr, appName, remoteLoggerURL, token s
 		RemoteLogger:    remoteLogger,
 		RemoteLoggerURL: remoteLoggerURL,
 		RemoteToken:     token,
+		RemoteUserName:  uname,
 	}
 }
 
