@@ -53,7 +53,7 @@ func (l *Logger) Init(config *Config) error {
 	l.level = config.Level
 	l.filePathSize = config.FilePathSize
 	if l.ref == "" {
-		refUUID := uuid.NewV4()
+		refUUID, err := uuid.NewV4()
 		if err != nil {
 			l.Error("Unable to generate new UUID. Err: ", err)
 			return err
