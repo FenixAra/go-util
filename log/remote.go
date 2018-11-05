@@ -35,7 +35,7 @@ func (l *Logger) LogAPIInfo(r *http.Request, responseTime float64, status int) {
 	}
 
 	file, line := l.GetFileLine(2)
-	go l.postToRemote("INFO", "API Request info", file, r, responseTime, status, line)
+	l.postToRemote("INFO", "API Request info", file, r, responseTime, status, line)
 }
 
 func (l *Logger) postToRemote(level, msg, file string, r *http.Request, responseTime float64, status, line int) {
@@ -99,5 +99,5 @@ func (l *Logger) postToRemote(level, msg, file string, r *http.Request, response
 
 func (l *Logger) PostToRemote(level, msg string) {
 	file, line := l.GetFileLine(3)
-	go l.postToRemote(level, msg, file, nil, 0, 0, line)
+	l.postToRemote(level, msg, file, nil, 0, 0, line)
 }
