@@ -29,6 +29,8 @@ type Log struct {
 	IPAddress    string    `json:"ip_address"`
 }
 
+var logChan = make(chan *Log, 2000)
+
 func (l *Logger) LogAPIInfo(r *http.Request, responseTime float64, status int) {
 	if !l.config.RemoteLogger {
 		return
@@ -39,7 +41,6 @@ func (l *Logger) LogAPIInfo(r *http.Request, responseTime float64, status int) {
 }
 
 func (l *Logger) postToRemote(level, msg, file string, r *http.Request, responseTime float64, status, line int) {
-	client := &http.Client{}
 	var method, req, ua, ip string
 	if r != nil {
 		method = r.Method
@@ -47,8 +48,7 @@ func (l *Logger) postToRemote(level, msg, file string, r *http.Request, response
 		ua = r.UserAgent()
 		ip = realip.RealIP(r)
 	}
-
-	reqData, err := json.Marshal(&Log{
+	logData := &Log{
 		Level:        level,
 		Timestamp:    time.Now().UTC(),
 		Title:        msg,
@@ -63,38 +63,47 @@ func (l *Logger) postToRemote(level, msg, file string, r *http.Request, response
 		Request:      req,
 		UserAgent:    ua,
 		IPAddress:    ip,
-	})
-	if err != nil {
-		log.Println("Unable to marshal log request. Err:", err)
-		return
 	}
 
-	request, err := http.NewRequest(http.MethodPost, l.config.RemoteLoggerURL, bytes.NewBuffer(reqData))
-	if err != nil {
-		log.Println("Unable to create new log request. Err:", err)
-		return
-	}
+	logChan <- logData
 
-	// Setting all headers
-	request.Header.Set("Content-Type", "application/json; charset=utf-8")
-	if l.config.RemoteToken != "" {
-		request.SetBasicAuth(l.config.RemoteUserName, l.config.RemoteToken)
-	}
+}
 
-	response, err := client.Do(request)
-	if err != nil {
-		log.Println("Unable to send log request. Err:", err)
-		return
-	}
+func (l *Logger) SendLogs() {
+	for {
+		logData := <-logChan
+		client := &http.Client{}
+		reqData, err := json.Marshal(logData)
+		if err != nil {
+			log.Println("Unable to marshal log request. Err:", err)
+			break
+		}
 
-	defer response.Body.Close()
-	if response.StatusCode != http.StatusOK {
-		log.Println("Status code is not 200 (OK). Got:", response.StatusCode)
-		// Handle the error codes
-		return
-	}
+		request, err := http.NewRequest(http.MethodPost, l.config.RemoteLoggerURL, bytes.NewBuffer(reqData))
+		if err != nil {
+			log.Println("Unable to create new log request. Err:", err)
+			break
+		}
 
-	return
+		// Setting all headers
+		request.Header.Set("Content-Type", "application/json; charset=utf-8")
+		if l.config.RemoteToken != "" {
+			request.SetBasicAuth(l.config.RemoteUserName, l.config.RemoteToken)
+		}
+
+		response, err := client.Do(request)
+		if err != nil {
+			log.Println("Unable to send log request. Err:", err)
+			break
+		}
+
+		defer response.Body.Close()
+		if response.StatusCode != http.StatusOK {
+			log.Println("Status code is not 200 (OK). Got:", response.StatusCode)
+			// Handle the error codes
+			break
+		}
+	}
 }
 
 func (l *Logger) PostToRemote(level, msg string) {
