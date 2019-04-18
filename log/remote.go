@@ -36,8 +36,15 @@ type Log struct {
 
 var logChan = make(chan Log, 2000)
 
-func (l *Logger) Log(log *Log) {
-	logChan <- *log
+func (l *Logger) Log(lg *Log) {
+	lg.Level = Info
+	lg.Timestamp = time.Now().UTC()
+	lg.RefID = l.config.Reference
+	lg.AppName = l.config.AppName
+	file, line := l.GetFileLine(2)
+	lg.File = file
+	lg.Line = strconv.Itoa(line)
+	logChan <- *lg
 }
 
 func (l *Logger) LogAPIInfo(r *http.Request, responseTime float64, status int) {
