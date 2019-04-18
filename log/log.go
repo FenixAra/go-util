@@ -7,8 +7,6 @@ import (
 	"runtime"
 	"strconv"
 	"time"
-
-	uuid "github.com/satori/go.uuid"
 )
 
 type Level int
@@ -34,50 +32,34 @@ const (
 )
 
 type Logger struct {
-	l            *log.Logger
-	level        Level
-	filePathSize int
-	ref          string
-	config       *Config
+	l      *log.Logger
+	config *Config
 }
 
 func New(config *Config) *Logger {
 	l := &Logger{}
 	l.config = config
-	l.Init(config)
+	l.Init()
 	go l.SendLogs()
 	return l
 }
 
-func (l *Logger) Init(config *Config) error {
-	l.ref = config.Reference
-	l.level = config.Level
-	l.filePathSize = config.FilePathSize
-	if l.ref == "" {
-		refUUID, err := uuid.NewV4()
-		if err != nil {
-			l.Error("Unable to generate new UUID. Err: ", err)
-			return err
-		}
-
-		l.ref = refUUID.String()
-	}
-
-	l.l = log.New(os.Stdout, fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref), 0)
+func (l *Logger) Init() error {
+	l.l = log.New(os.Stdout, fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.config.Reference), 0)
 	return nil
 }
 
 func (l *Logger) GetRef() string {
-	return l.ref
+	return l.config.Reference
 }
 
 func (l *Logger) Debug(v ...interface{}) {
-	if l.level > DEBUG {
+	if l.config.Level > DEBUG {
 		return
 	}
 
-	if l.config.RemoteLogger {
-		l.PostToRemote("DEBUG", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintln(l.formatLog("DEBUG", v...)...))
+	if l.config.remoteLogger {
+		go l.PostToRemote("DEBUG", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.config.Reference)+fmt.Sprintln(l.formatLog("DEBUG", v...)...))
 		return
 	}
 
@@ -85,12 +67,12 @@ func (l *Logger) Debug(v ...interface{}) {
 }
 
 func (l *Logger) Info(v ...interface{}) {
-	if l.level > INFO {
+	if l.config.Level > INFO {
 		return
 	}
 
-	if l.config.RemoteLogger {
-		l.PostToRemote("INFO", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintln(l.formatLog("INFO", v...)...))
+	if l.config.remoteLogger {
+		go l.PostToRemote("INFO", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.config.Reference)+fmt.Sprintln(l.formatLog("INFO", v...)...))
 		return
 	}
 
@@ -98,12 +80,12 @@ func (l *Logger) Info(v ...interface{}) {
 }
 
 func (l *Logger) Warn(v ...interface{}) {
-	if l.level > WARN {
+	if l.config.Level > WARN {
 		return
 	}
 
-	if l.config.RemoteLogger {
-		l.PostToRemote("WARN", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintln(l.formatLog("WARN", v...)...))
+	if l.config.remoteLogger {
+		go l.PostToRemote("WARN", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.config.Reference)+fmt.Sprintln(l.formatLog("WARN", v...)...))
 		return
 	}
 
@@ -111,12 +93,12 @@ func (l *Logger) Warn(v ...interface{}) {
 }
 
 func (l *Logger) Error(v ...interface{}) {
-	if l.level > ERROR {
+	if l.config.Level > ERROR {
 		return
 	}
 
-	if l.config.RemoteLogger {
-		l.PostToRemote("ERROR", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintln(l.formatLog("ERROR", v...)...))
+	if l.config.remoteLogger {
+		go l.PostToRemote("ERROR", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.config.Reference)+fmt.Sprintln(l.formatLog("ERROR", v...)...))
 		return
 	}
 
@@ -124,12 +106,12 @@ func (l *Logger) Error(v ...interface{}) {
 }
 
 func (l *Logger) Fatal(v ...interface{}) {
-	if l.level > FATAL {
+	if l.config.Level > FATAL {
 		return
 	}
 
-	if l.config.RemoteLogger {
-		l.PostToRemote("FATAL", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintln(l.formatLog("FATAL", v...)...))
+	if l.config.remoteLogger {
+		go l.PostToRemote("FATAL", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.config.Reference)+fmt.Sprintln(l.formatLog("FATAL", v...)...))
 		return
 	}
 
@@ -137,13 +119,13 @@ func (l *Logger) Fatal(v ...interface{}) {
 }
 
 func (l *Logger) Debugf(format string, v ...interface{}) {
-	if l.level > DEBUG {
+	if l.config.Level > DEBUG {
 		return
 	}
 
 	format, v = l.formatLogf("DEBUG", format, v...)
-	if l.config.RemoteLogger {
-		l.PostToRemote("DEBUG", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintf(format, v...))
+	if l.config.remoteLogger {
+		l.PostToRemote("DEBUG", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.config.Reference)+fmt.Sprintf(format, v...))
 		return
 	}
 
@@ -151,13 +133,13 @@ func (l *Logger) Debugf(format string, v ...interface{}) {
 }
 
 func (l *Logger) Infof(format string, v ...interface{}) {
-	if l.level > INFO {
+	if l.config.Level > INFO {
 		return
 	}
 
 	format, v = l.formatLogf("INFO", format, v...)
-	if l.config.RemoteLogger {
-		l.PostToRemote("INFO", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintf(format, v...))
+	if l.config.remoteLogger {
+		go l.PostToRemote("INFO", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.config.Reference)+fmt.Sprintf(format, v...))
 		return
 	}
 
@@ -165,13 +147,13 @@ func (l *Logger) Infof(format string, v ...interface{}) {
 }
 
 func (l *Logger) Warnf(format string, v ...interface{}) {
-	if l.level > WARN {
+	if l.config.Level > WARN {
 		return
 	}
 
 	format, v = l.formatLogf("WARN", format, v...)
-	if l.config.RemoteLogger {
-		l.PostToRemote("WARN", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintf(format, v...))
+	if l.config.remoteLogger {
+		go l.PostToRemote("WARN", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.config.Reference)+fmt.Sprintf(format, v...))
 		return
 	}
 
@@ -179,13 +161,13 @@ func (l *Logger) Warnf(format string, v ...interface{}) {
 }
 
 func (l *Logger) Errorf(format string, v ...interface{}) {
-	if l.level > ERROR {
+	if l.config.Level > ERROR {
 		return
 	}
 
 	format, v = l.formatLogf("ERROR", format, v...)
-	if l.config.RemoteLogger {
-		l.PostToRemote("ERROR", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintf(format, v...))
+	if l.config.remoteLogger {
+		go l.PostToRemote("ERROR", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.config.Reference)+fmt.Sprintf(format, v...))
 		return
 	}
 
@@ -193,13 +175,13 @@ func (l *Logger) Errorf(format string, v ...interface{}) {
 }
 
 func (l *Logger) Fatalf(format string, v ...interface{}) {
-	if l.level > FATAL {
+	if l.config.Level > FATAL {
 		return
 	}
 
 	format, v = l.formatLogf("FATAL", format, v...)
-	if l.config.RemoteLogger {
-		l.PostToRemote("FATAL", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.ref)+fmt.Sprintf(format, v...))
+	if l.config.remoteLogger {
+		go l.PostToRemote("FATAL", fmt.Sprintf("%v [%s] [ %s ] ", time.Now().UTC(), l.config.AppName, l.config.Reference)+fmt.Sprintf(format, v...))
 		return
 	}
 
@@ -235,7 +217,7 @@ func (l *Logger) formatLogf(logType string, format string, v ...interface{}) (st
 func (l *Logger) GetFileLine(n int) (string, int) {
 	_, file, line, _ := runtime.Caller(n)
 	// If you want the short path not the full file path, you can uncomment everything below
-	if l.filePathSize == SHORT {
+	if l.config.FilePathSize == SHORT {
 		short := file
 		for i := len(file) - 1; i > 0; i-- {
 			if file[i] == '/' {

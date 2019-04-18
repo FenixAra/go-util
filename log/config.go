@@ -1,5 +1,7 @@
 package log
 
+import uuid "github.com/satori/go.uuid"
+
 type Config struct {
 	// The supported log levels are as follows
 	// DEBUG < INFO < WARN < ERROR < FATAL
@@ -26,7 +28,7 @@ type Config struct {
 
 	AppName string
 
-	RemoteLogger bool
+	remoteLogger bool
 
 	RemoteLoggerURL string
 
@@ -35,56 +37,64 @@ type Config struct {
 	RemoteUserName string
 }
 
-func NewConfig(ref, levelStr, filePathSizeStr, appName, remoteLoggerURL, token, uname string) *Config {
-	var level Level
-	var filePathSize int
-	switch levelStr {
-	case Debug:
-		level = DEBUG
-	case Info:
-		level = INFO
-	case Warn:
-		level = WARN
-	case Error:
-		level = ERROR
-	case Fatal:
-		level = FATAL
-	default:
-		level = INFO
-	}
-
-	var remoteLogger bool
-	if remoteLoggerURL != "" {
-		remoteLogger = true
-	}
-
-	switch filePathSizeStr {
-	case FilePathShort:
-		filePathSize = SHORT
-	case FilePathFull:
-		filePathSize = FULL
-	default:
-		filePathSize = SHORT
-	}
-
+func NewConfig(name string) *Config {
+	uuid, _ := uuid.NewV4()
 	return &Config{
-		Reference:       ref,
-		Level:           level,
-		FilePathSize:    filePathSize,
-		AppName:         appName,
-		RemoteLogger:    remoteLogger,
-		RemoteLoggerURL: remoteLoggerURL,
-		RemoteToken:     token,
-		RemoteUserName:  uname,
+		Reference:       uuid.String(),
+		Level:           DEBUG,
+		FilePathSize:    SHORT,
+		AppName:         name,
+		remoteLogger:    false,
+		RemoteLoggerURL: "",
+		RemoteToken:     "",
+		RemoteUserName:  "",
 	}
+}
+
+func (c *Config) SetRemoteConfig(url, token, uname string) {
+	if url != "" {
+		c.remoteLogger = true
+	}
+
+	c.RemoteLoggerURL = url
+	c.RemoteToken = token
+	c.RemoteUserName = uname
 }
 
 func (c *Config) SetLevel(level Level) {
 	c.Level = level
 }
 
+func (c *Config) SetLevelStr(lvl string) {
+	switch lvl {
+	case Debug:
+		c.Level = DEBUG
+	case Info:
+		c.Level = INFO
+	case Warn:
+		c.Level = WARN
+	case Error:
+		c.Level = ERROR
+	case Fatal:
+		c.Level = FATAL
+	default:
+		c.Level = INFO
+	}
+}
+
 func (c *Config) SetFilePathSize(filePathSize int) {
 	c.FilePathSize = filePathSize
+}
+
+func (c *Config) SetFilePathSizeStr(fps string) {
+	switch fps {
+	case FilePathShort:
+		c.FilePathSize = SHORT
+	case FilePathFull:
+		c.FilePathSize = FULL
+	default:
+		c.FilePathSize = SHORT
+	}
 }
 
 func (c *Config) SetReference(ref string) {

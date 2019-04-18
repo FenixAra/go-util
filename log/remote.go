@@ -12,27 +12,36 @@ import (
 )
 
 type Log struct {
-	Level        string    `json:"level"`
-	Timestamp    time.Time `json:"timestamp"`
-	Title        string    `json:"message"`
-	Message      string    `json:"full_message"`
-	AppName      string    `json:"app_name"`
-	RefID        string    `json:"ref_id"`
-	File         string    `json:"file"`
-	Line         string    `json:"line"`
-	ResponseTime float64   `json:"response_time"`
-	StatusCode   int       `json:"status_code"`
-	Method       string    `json:"method"`
-	Request      string    `json:"request"`
-	UserAgent    string    `json:"user_agent"`
-	CustomerID   string    `json:"customer_id"`
-	IPAddress    string    `json:"ip_address"`
+	Level          string    `json:"level"`
+	Timestamp      time.Time `json:"timestamp"`
+	Title          string    `json:"message"`
+	Message        string    `json:"full_message"`
+	AppName        string    `json:"app_name"`
+	RefID          string    `json:"ref_id"`
+	File           string    `json:"file"`
+	Line           string    `json:"line"`
+	ResponseTime   float64   `json:"response_time"`
+	StatusCode     int       `json:"status_code"`
+	Method         string    `json:"method"`
+	Request        string    `json:"request"`
+	UserAgent      string    `json:"user_agent"`
+	CustomerID     string    `json:"customer_id"`
+	IPAddress      string    `json:"ip_address"`
+	RequestGroup   string    `json:"request_group" example:"Ping"`
+	AppVersion     string    `json:"app_version" example:"App Version"`
+	TimeTaken      float64   `json:"time_taken" example:"1.11"`
+	DependancyType string    `json:"dependancy_type" example:"http,database"`
+	DependancyName string    `json:"dependancy_name" example:"googleapi,booktripsp"`
 }
 
-var logChan = make(chan *Log, 2000)
+var logChan = make(chan Log, 2000)
+
+func (l *Logger) Log(log *Log) {
+	logChan <- *log
+}
 
 func (l *Logger) LogAPIInfo(r *http.Request, responseTime float64, status int) {
-	if !l.config.RemoteLogger {
+	if !l.config.remoteLogger {
 		return
 	}
 
@@ -54,7 +63,7 @@ func (l *Logger) postToRemote(level, msg, file string, r *http.Request, response
 		Title:        msg,
 		Message:      msg,
 		AppName:      l.config.AppName,
-		RefID:        l.ref,
+		RefID:        l.config.Reference,
 		File:         file,
 		Line:         strconv.Itoa(line),
 		ResponseTime: responseTime,
@@ -65,7 +74,7 @@ func (l *Logger) postToRemote(level, msg, file string, r *http.Request, response
 		IPAddress:    ip,
 	}
 
-	logChan <- logData
+	logChan <- *logData
 
 }
 
