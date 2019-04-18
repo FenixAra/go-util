@@ -11,6 +11,12 @@ import (
 	"github.com/tomasen/realip"
 )
 
+const (
+	DependancyTypeHTTP  = "http"
+	DependancyTypeDB    = "db"
+	DependancyTypeRedis = "redis"
+)
+
 type Log struct {
 	Level          string    `json:"level"`
 	Timestamp      time.Time `json:"timestamp"`
