@@ -98,5 +98,9 @@ func (c *Config) SetFilePathSizeStr(fps string) {
 }
 
 func (c *Config) SetReference(ref string) {
+	if ref == "" {
+		return
+	}
+
 	c.Reference = ref
 }
