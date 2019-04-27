@@ -40,7 +40,6 @@ func New(config *Config) *Logger {
 	l := &Logger{}
 	l.config = config
 	l.Init()
-	go l.SendLogs()
 	return l
 }
 

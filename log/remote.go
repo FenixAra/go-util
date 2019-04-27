@@ -40,8 +40,6 @@ type Log struct {
 	DependancyName string    `json:"dependancy_name" example:"googleapi,booktripsp"`
 }
 
-var logChan = make(chan Log, 2000)
-
 func (l *Logger) Log(lg *Log) {
 	lg.Level = Info
 	lg.Timestamp = time.Now().UTC()
@@ -50,7 +48,7 @@ func (l *Logger) Log(lg *Log) {
 	file, line := l.GetFileLine(2)
 	lg.File = file
 	lg.Line = strconv.Itoa(line)
-	logChan <- *lg
+	go l.sendLog(*lg)
 }
 
 func (l *Logger) LogAPIInfo(r *http.Request, responseTime float64, status int) {
@@ -87,44 +85,40 @@ func (l *Logger) postToRemote(level, msg, file string, r *http.Request, response
 		IPAddress:    ip,
 	}
 
-	logChan <- *logData
-
+	go l.sendLog(*logData)
 }
 
-func (l *Logger) SendLogs() {
-	for {
-		logData := <-logChan
-		client := &http.Client{}
-		reqData, err := json.Marshal(logData)
-		if err != nil {
-			log.Println("Unable to marshal log request. Err:", err)
-			break
-		}
+func (l *Logger) sendLog(logData Log) {
+	client := &http.Client{}
+	reqData, err := json.Marshal(logData)
+	if err != nil {
+		log.Println("Unable to marshal log request. Err:", err)
+		return
+	}
 
-		request, err := http.NewRequest(http.MethodPost, l.config.RemoteLoggerURL, bytes.NewBuffer(reqData))
-		if err != nil {
-			log.Println("Unable to create new log request. Err:", err)
-			break
-		}
+	request, err := http.NewRequest(http.MethodPost, l.config.RemoteLoggerURL, bytes.NewBuffer(reqData))
+	if err != nil {
+		log.Println("Unable to create new log request. Err:", err)
+		return
+	}
 
-		// Setting all headers
-		request.Header.Set("Content-Type", "application/json; charset=utf-8")
-		if l.config.RemoteToken != "" {
-			request.SetBasicAuth(l.config.RemoteUserName, l.config.RemoteToken)
-		}
+	// Setting all headers
+	request.Header.Set("Content-Type", "application/json; charset=utf-8")
+	if l.config.RemoteToken != "" {
+		request.SetBasicAuth(l.config.RemoteUserName, l.config.RemoteToken)
+	}
 
-		response, err := client.Do(request)
-		if err != nil {
-			log.Println("Unable to send log request. Err:", err)
-			break
-		}
+	response, err := client.Do(request)
+	if err != nil {
+		log.Println("Unable to send log request. Err:", err)
+		return
+	}
 
-		defer response.Body.Close()
-		if response.StatusCode != http.StatusOK {
-			log.Println("Status code is not 200 (OK). Got:", response.StatusCode)
-			// Handle the error codes
-			break
-		}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		log.Println("Status code is not 200 (OK). Got:", response.StatusCode)
+		// Handle the error codes
+		return
 	}
 }
 
