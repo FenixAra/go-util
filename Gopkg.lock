@@ -4,7 +4,7 @@
 [[projects]]
   name = "github.com/satori/go.uuid"
   packages = ["."]
-  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  revision = "b2ce2384e17bbe0c6d34077efa39dbab3e09123b"
   version = "v1.2.0"
 
 [[projects]]
