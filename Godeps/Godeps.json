@@ -8,7 +8,6 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/satori/go.uuid",
-			"Comment": "v1.2.0-4-g36e9d2e",
 			"Rev": "b2ce2384e17bbe0c6d34077efa39dbab3e09123b"
 		},
 		{
