@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/swecabin/go-util/log"
+	"github.com/FenixAra/go-util/log"
 )
 
 const (
