@@ -2,20 +2,36 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:ea3012588513a18a0dbef4b6746741d5110fc27253ae762bd3d7f673a4b3c19b"
+  name = "github.com/FenixAra/go-util"
+  packages = ["log"]
+  pruneopts = "UT"
+  revision = "99583644cc48d0343e3695c154138daa80ef15ab"
+
+[[projects]]
+  digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
   name = "github.com/satori/go.uuid"
   packages = ["."]
+  pruneopts = "UT"
   revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
   version = "v1.2.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:30d7b01d02b2705c10274b5110968918c9e3a5a52dae90b40463f6923becd52a"
   name = "github.com/tomasen/realip"
   packages = ["."]
+  pruneopts = "UT"
   revision = "f0c99a92ddcedd3964a269d23c8e89d9a9229be6"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "444e474764ac65f7ed15ddb2f2a536dfc33a41b237007a8c0503a77f691e0e2b"
+  input-imports = [
+    "github.com/FenixAra/go-util/log",
+    "github.com/satori/go.uuid",
+    "github.com/tomasen/realip",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
