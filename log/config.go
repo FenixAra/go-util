@@ -1,6 +1,8 @@
 package log
 
-import uuid "github.com/satori/go.uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type Config struct {
 	// The supported log levels are as follows
@@ -38,7 +40,7 @@ type Config struct {
 }
 
 func NewConfig(name string) *Config {
-	uuid, _ := uuid.NewV4()
+	uuid := uuid.New()
 	return &Config{
 		Reference:       uuid.String(),
 		Level:           DEBUG,
